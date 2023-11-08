@@ -6,6 +6,7 @@ import axios from 'axios';
 import { IPaginacao } from '../../interfaces/IPaginacao';
 import IPrato from '../../interfaces/IPrato';
 import Prato from './Prato';
+import TextField from '@mui/material/TextField';
 
 
 const ListaRestaurantes = () => {
@@ -14,50 +15,78 @@ const ListaRestaurantes = () => {
   const [restaurantes, setRestaurantes] = useState<IRestaurante[]>([])
   const [proximaPagina, setProximaPagina] = useState('')
   const [pratos, setPratos] = useState<IPrato[]>([])
+  const [nomeRestaurante, setNomeRestaurante] = useState('')
 
+  const [restaurantesOriginais, setRestaurantesOriginais] = useState<IRestaurante[]>([]);
 
+  //Lista todos os restaurantes cadastrados
   useEffect(() => {
-    //O axios acessa a URL de consulta dos restaurantes cadastrados
-    axios.get<IPaginacao<IRestaurante>>('http://localhost:8000/api/v1/restaurantes/')
-      //O then pega o resultado da requisição e adiciona o valor dela em setRestaurantes
-      .then(resposta => {
-        setRestaurantes(resposta.data.results) //Pega o retorno da requisição e adiciona o valor dela em restaurantes e converte para results. 
-        setProximaPagina(resposta.data.next) //Pega o retorno da requisição e adiciona o valor dela em proximaPagina e converte para next. 
+    axios.get('http://localhost:8000/api/v1/restaurantes/')
+      .then((resposta) => {
+        setRestaurantes(resposta.data.results);
+        setRestaurantesOriginais(resposta.data.results);
       })
-      .catch(erro => {
-        console.log(erro)
-      })
-  }, [])
-
-  useEffect(() => {
+      .catch((erro) => {
+        console.log(erro);
+      });
+    
+    //Lista todos os pratos cadastrados
     axios.get('http://localhost:8000/api/v1/pratos/')
-      .then(resposta => {
-        setPratos(resposta.data.results)
+      .then((resposta) => {
+        setPratos(resposta.data.results);
       })
-      .catch(erro => {
-        console.log(erro)
-      })
-  }, [])
+      .catch((erro) => {
+        console.log(erro);
+      });
+  }, []);
+
+  //Função de pesquisa onde passa o nome como parametro
+  const handleSearch = (nome: string) => {
+    //resultadoPesquisa recebe uma nova lista após aplicação de um filtro de busca por nome do restaurante
+    const resultadoPesquisa = restaurantesOriginais.filter((restaurante) =>
+      restaurante.nome.toLowerCase().includes(nome.toLowerCase())
+    );
+  //Verifica se a string de pesquisa (nome) está vazia. Se estiver vazia,
+  //a lista de restaurantes é exibida (carregando todos os restaurantes).
+  //Se o campo estiver preenchido, realiza uma busca.
+    if (nome === '') {
+      setRestaurantes(restaurantesOriginais);
+    } else {
+      setRestaurantes(resultadoPesquisa);
+    }
+  };
+
+  useEffect(() => {
+    handleSearch(nomeRestaurante);
+  }, [nomeRestaurante, restaurantesOriginais]);
+
 
   const verMais = () => {
     axios.get<IPaginacao<IRestaurante>>(proximaPagina)
-      .then(resposta => {
-        setRestaurantes([...restaurantes, ...resposta.data.results]) //Concatena os resultados anteriores com os novos resultados
-        setProximaPagina(resposta.data.next)
+      .then((resposta) => {
+        setRestaurantes([...restaurantes, ...resposta.data.results]);
+        setProximaPagina(resposta.data.next);
       })
-      .catch(erro => {
-        console.log(erro)
-      })
-  }
+      .catch((erro) => {
+        console.log(erro);
+      });
+  };
 
   return (
-<section className={style.ListaRestaurantes}>
+    <section className={style.ListaRestaurantes}>
       <h1>Os restaurantes mais <em>bacanas</em>!</h1>
-      
+
+      <TextField
+        id="outlined-helperText"
+        label="Procurar restaurante"
+        value={nomeRestaurante}
+        onChange={evento => setNomeRestaurante(evento.target.value)}
+      />
+
       {restaurantes?.map(restaurante => ( // Mapeia uma lista de restaurantes cadastrados, podendo retornar null.
 
         <div key={restaurante.id}>  {/*Para cada item retornado da lista, é vinculado a ele o id do restaurante. */}
-      
+
           <Restaurante restaurante={restaurante} /> {/* Aqui será renderizado o componente Restaurante, passando as informações de restaurante. */}
 
           {pratos.filter(prato => prato.restaurante === restaurante.id) //Filtra apenas os pratos associados a um restaurante específico. Comparando o restaurante de cada prato com o id do restaurante atual.

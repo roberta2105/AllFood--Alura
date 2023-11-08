@@ -1,53 +1,61 @@
-import { Button, TextField } from "@mui/material"
-import axios from "axios"
+import { Box, Button, TextField, Typography } from "@mui/material"
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import IRestaurante from "../../../interfaces/IRestaurante"
+import 'bootstrap/dist/css/bootstrap.min.css';
+import http from "../../../http"
 
 const FormularioRestaurante = () => {
+
+    const [nomeRestaurante, setNomeRestaurante] = useState('')
 
     const parametros = useParams()
 
     useEffect(() => {
         if (parametros.id) {
-            axios.get<IRestaurante>(`http://localhost:8000/api/v2/restaurantes/${parametros.id}/`)
+            http.get<IRestaurante>(`restaurantes/${parametros.id}/`)
                 .then(resposta => setNomeRestaurante(resposta.data.nome))
         }
     }, [parametros])
-
-    const [nomeRestaurante, setNomeRestaurante] = useState('')
 
     // Função para lidar com o envio do formulário
     const aoSubmeterForm = (evento: React.FormEvent<HTMLFormElement>) => { //é uma maneira de indicar que a função aoSubmeterForm espera receber um evento de formulário HTML quando é chamada
         evento.preventDefault() // Impede o comportamento padrão do formulário de atualizar a página
 
         if (parametros.id) {
-            axios.put(`http://localhost:8000/api/v2/restaurantes/${parametros.id}/`, { //Faz uma requisição para api salvar um novo objeto, passando o nome do novo obj.
+            http.put(`restaurantes/${parametros.id}/`, { //Faz uma requisição para api salvar um novo objeto, passando o nome do novo obj.
                 nome: nomeRestaurante
             })
                 .then(() => {
                     alert("Restaurante atualizado com sucesso!")
                 })
         } else {
-            axios.post('http://localhost:8000/api/v2/restaurantes/', { //Faz uma requisição para api salvar um novo objeto, passando o nome do novo obj.
+            http.post('restaurantes/', { //Faz uma requisição para api salvar um novo objeto, passando o nome do novo obj.
                 nome: nomeRestaurante
             })
                 .then(() => {
                     alert("Restaurante cadastrado com sucesso!")
                 })
         }
-
-
     }
 
-
-    return (<form onSubmit={aoSubmeterForm}>
-        <TextField value={nomeRestaurante}
-            onChange={evento => setNomeRestaurante(evento.target.value)}
-            label="Nome do Restaurante"
-            variant="standard" />
-        <Button type="submit" variant="outlined">Enviar</Button>
-    </form>)
+    return (
+        <Box sx={{ display: 'flex', flexDirection: "column", alignItems: "center"}}>
+            <Typography sx={{ marginTop: 8 }} component="h1" variant="h6">Formulário de Restaurantes</Typography>
+            <Box className="container p-5 my-5 border" component="form" 
+                onSubmit={aoSubmeterForm}>
+                <TextField
+                    value={nomeRestaurante}
+                    onChange={evento => setNomeRestaurante(evento.target.value)}
+                    label="Nome do Restaurante"
+                    variant="standard" 
+                    fullWidth
+                    required
+                    />
+                <Button sx={{ marginTop: 1 }}  type="submit" variant="outlined">Enviar</Button>
+            </Box>
+        </Box>
+    )
 }
 
 export default FormularioRestaurante
