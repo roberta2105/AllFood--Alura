@@ -5,6 +5,7 @@ import IRestaurante from "../../../interfaces/IRestaurante"
 import 'bootstrap/dist/css/bootstrap.min.css';
 import http from "../../../http"
 
+
 const FormularioRestaurante = () => {
 
     const [nomeRestaurante, setNomeRestaurante] = useState('')
@@ -40,21 +41,22 @@ const FormularioRestaurante = () => {
     }
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: "column", alignItems: "center"}}>
+
+        <Box sx={{ display: 'flex', flexDirection: "column", alignItems: "center", flexGrow: 1 }}>
             <Typography sx={{ marginTop: 8 }} component="h1" variant="h6">Formulário de Restaurantes</Typography>
-            <Box className="container p-5 my-5 border" component="form" 
-                onSubmit={aoSubmeterForm}>
+            <Box component="form" sx={{ width: '100%' }} onSubmit={aoSubmeterForm}>
                 <TextField
                     value={nomeRestaurante}
                     onChange={evento => setNomeRestaurante(evento.target.value)}
                     label="Nome do Restaurante"
-                    variant="standard" 
+                    variant="standard"
                     fullWidth
                     required
-                    />
-                <Button sx={{ marginTop: 1 }}  type="submit" variant="outlined">Enviar</Button>
+                />
+                <Button sx={{ marginTop: 1 }} type="submit" variant="outlined" fullWidth>Enviar</Button>
             </Box>
         </Box>
+
     )
 }
 
